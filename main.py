@@ -58,7 +58,7 @@ def decode_atrac():
             @after_this_request 
             def remove_file(response): 
                 os.remove(os.path.join(api.config['UPLOAD_FOLDER'], filename)) 
-                os.remove(os.path.join(api.config['UPLOAD_FOLDER'], filename) + '.at3')
+                os.remove(os.path.join(api.config['UPLOAD_FOLDER'], filename) + '.wav')
                 return response 
             filename = secure_filename(file.filename)
             file.save(os.path.join(api.config['UPLOAD_FOLDER'], filename))
