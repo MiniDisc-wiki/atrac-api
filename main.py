@@ -1,10 +1,13 @@
 from flask import Flask, request, after_this_request, Response, send_from_directory
-import os, subprocess
+import os, subprocess, signal, sys
 from werkzeug.utils import secure_filename
+from pathlib import Path
+from flask_cors import CORS
 
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/uploads/')
 
 api = Flask(__name__)
+CORS(api)
 api.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and \
@@ -32,15 +35,17 @@ def encode_atrac():
         if file and allowed_file(file.filename):
             @after_this_request 
             def remove_file(response): 
-                os.remove(os.path.join(api.config['UPLOAD_FOLDER'], filename)) 
-                os.remove(os.path.join(api.config['UPLOAD_FOLDER'], filename) + '.at3')
+                api.logger.info(f"Successfully encoded {Path(filename).stem}.at3")
+                os.remove(os.path.join(api.config['UPLOAD_FOLDER'], filename))
+                os.remove(os.path.join(api.config['UPLOAD_FOLDER'], Path(filename).stem) + '.at3')
                 return response 
             filename = secure_filename(file.filename)
+            api.logger.info(f"Beginning encode for {filename}")
             file.save(os.path.join(api.config['UPLOAD_FOLDER'], filename))
             encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
               os.path.join(api.config['UPLOAD_FOLDER'], filename), 
-              os.path.join(api.config['UPLOAD_FOLDER'], filename) + '.at3'], capture_output=True)
-            return send_from_directory(directory=api.config['UPLOAD_FOLDER'], path=filename + '.at3')
+              os.path.join(api.config['UPLOAD_FOLDER'], Path(filename).stem) + '.at3'], capture_output=True)
+            return send_from_directory(directory=api.config['UPLOAD_FOLDER'], path=Path(filename).stem + '.at3')
 
 
 @api.route('/decode', methods=['POST'])
@@ -68,4 +73,8 @@ def decode_atrac():
             return send_from_directory(directory=api.config['UPLOAD_FOLDER'], path=filename + '.wav')
 
 if __name__ == '__main__':
-    api.run(host="0.0.0.0") 
+  def signal_handler(sig, frame):
+      print('SIGINT received, shutting down')
+      sys.exit(0)
+  signal.signal(signal.SIGINT, signal_handler)
+  api.run(host="0.0.0.0") 
