@@ -2,6 +2,7 @@ FROM python:slim
 
 ENV WINEPREFIX="/wine32" 
 ENV WINEARCH=win32 
+ENV LOG_LEVEL=
 RUN dpkg --add-architecture i386
 RUN apt-get update
 RUN apt-get install -y wine32 wine:i386 --no-install-recommends
@@ -13,4 +14,5 @@ RUN pip install -r requirements.txt
 RUN mkdir /uploads
 COPY main.py .
 
-CMD python3 main.py
+ENTRYPOINT ["uvicorn"]
+CMD ["main:api", "--host", "0.0.0.0", "--port", "5000"]
