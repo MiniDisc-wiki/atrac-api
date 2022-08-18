@@ -12,7 +12,7 @@ COPY psp_at3tool.exe .
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN mkdir /uploads
-COPY main.py .
+COPY *.py ./
 
 ENTRYPOINT ["uvicorn"]
 CMD ["main:api", "--host", "0.0.0.0", "--port", "5000"]
