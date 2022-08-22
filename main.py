@@ -31,7 +31,7 @@ def encode_atrac(type: atracTypes, background_tasks: BackgroundTasks, file: Uplo
     raise HTTPException(status_code=400, detail="Invalid encoding type")
   filename = file.filename
   logger.info(f"Beginning encode for {filename}")
-  output = NamedTemporaryFile()
+  output = NamedTemporaryFile(delete=False)
   with NamedTemporaryFile() as input:
     shutil.copyfileobj(file.file, input)
     encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
@@ -46,7 +46,7 @@ def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
   global logger
   filename = file.filename
   logger.info(f"Beginning decode for {filename}")
-  output = NamedTemporaryFile()
+  output = NamedTemporaryFile(delete=False)
   with NamedTemporaryFile() as input:
     shutil.copyfileobj(file.file, input)
     encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-d', 
