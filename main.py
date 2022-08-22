@@ -31,12 +31,14 @@ def encode_atrac(type: atracTypes, background_tasks: BackgroundTasks, file: Uplo
     raise HTTPException(status_code=400, detail="Invalid encoding type")
   filename = file.filename
   logger.info(f"Beginning encode for {filename}")
-  with NamedTemporaryFile() as input, NamedTemporaryFile() as output:
+  output = NamedTemporaryFile()
+  with NamedTemporaryFile() as input:
     shutil.copyfileobj(file.file, input)
     encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
       Path(input.name), 
       Path(output.name)], capture_output=True)
     logger.info(encoder.stdout.decode())
+    background_tasks.add_task(remove_file, output.name, logger)
     return FileResponse(path=output.name, filename=Path(filename).stem + '.at3')
 
 @api.post('/decode')
@@ -44,10 +46,12 @@ def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
   global logger
   filename = file.filename
   logger.info(f"Beginning decode for {filename}")
-  with NamedTemporaryFile() as input, NamedTemporaryFile as output:
+  output = NamedTemporaryFile()
+  with NamedTemporaryFile() as input:
     shutil.copyfileobj(file.file, input)
     encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-d', 
       Path(input.name), 
       Path(output.name)], capture_output=True)
     logger.info(encoder.stdout.decode())
+    background_tasks.add_task(remove_file, output.name, logger)
     return FileResponse(path=output.name, filename=Path(filename).stem + '.wav')
