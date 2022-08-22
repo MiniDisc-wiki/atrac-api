@@ -1,4 +1,4 @@
-import os, subprocess, logging, shutil
+import subprocess, logging, shutil
 from fastapi import FastAPI, File, UploadFile, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
 from pathlib import Path
@@ -31,25 +31,23 @@ def encode_atrac(type: atracTypes, background_tasks: BackgroundTasks, file: Uplo
     raise HTTPException(status_code=400, detail="Invalid encoding type")
   filename = file.filename
   logger.info(f"Beginning encode for {filename}")
-  with NamedTemporaryFile() as tmp:
-    shutil.copyfileobj(file.file, tmp)
+  with NamedTemporaryFile() as input, NamedTemporaryFile() as output:
+    shutil.copyfileobj(file.file, input)
     encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
-      Path(tmp.name), 
-      os.path.join(UPLOAD_FOLDER, Path(filename).stem) + '.at3'], capture_output=True)
+      Path(input.name), 
+      Path(output.name)], capture_output=True)
     logger.info(encoder.stdout.decode())
-    background_tasks.add_task(remove_file, os.path.join(UPLOAD_FOLDER, Path(filename).stem) + '.at3', logger)
-    return FileResponse(path=os.path.join(UPLOAD_FOLDER, Path(filename).stem) + '.at3', filename=Path(filename).stem + '.at3')
+    return FileResponse(path=output.name, filename=Path(filename).stem + '.at3')
 
 @api.post('/decode')
 def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
   global logger
   filename = file.filename
   logger.info(f"Beginning decode for {filename}")
-  with NamedTemporaryFile() as tmp:
-    shutil.copyfileobj(file.file, tmp)
+  with NamedTemporaryFile() as input, NamedTemporaryFile as output:
+    shutil.copyfileobj(file.file, input)
     encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-d', 
-      Path(tmp.name), 
-      os.path.join(UPLOAD_FOLDER, Path(filename).stem) + '.wav'], capture_output=True)
+      Path(input.name), 
+      Path(output.name)], capture_output=True)
     logger.info(encoder.stdout.decode())
-    background_tasks.add_task(remove_file, os.path.join(UPLOAD_FOLDER, Path(filename).stem) + '.wav', logger)
-    return FileResponse(path=os.path.join(UPLOAD_FOLDER, Path(filename).stem) + '.wav', filename=Path(filename).stem + '.wav')
+    return FileResponse(path=output.name, filename=Path(filename).stem + '.wav')
