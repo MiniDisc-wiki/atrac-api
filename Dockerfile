@@ -14,5 +14,6 @@ RUN pip install -r requirements.txt
 RUN mkdir /uploads
 COPY *.py ./
 
+EXPOSE 5000
 ENTRYPOINT ["uvicorn"]
 CMD ["main:api", "--host", "0.0.0.0", "--port", "5000"]
