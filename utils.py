@@ -28,6 +28,6 @@ def do_encode(input, type, logger):
   output = Path(gettempdir(), str(uuid4())).absolute()
   encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
     input, 
-    output], capture_output=True)
+    output], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
   logger.info(encoder.stdout.decode())
   return output

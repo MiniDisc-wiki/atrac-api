@@ -60,7 +60,7 @@ def transcode_atrac(type: atracTypes, background_tasks: BackgroundTasks, applyRe
       '/usr/bin/ffmpeg', '-i',
       Path(input.name),
       *transcoderCommands,
-      intermediary], capture_output=True)
+      intermediary], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     logger.info(transcoder.stdout.decode())
   
   logger.info("Starting at3tool...")
