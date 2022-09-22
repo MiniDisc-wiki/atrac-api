@@ -33,9 +33,9 @@ def encode_atrac(type: atracTypes, background_tasks: BackgroundTasks, file: Uplo
   logger.info(f"Beginning encode for {filename}")
   with NamedTemporaryFile() as input:
     shutil.copyfileobj(file.file, input)
-    output = do_encode(input, type, logger)
+    output = do_encode(input.name, type, logger)
   background_tasks.add_task(remove_file, output, logger)
-  return FileResponse(path=output, filename=Path(filename).stem + '.at3')
+  return FileResponse(path=output, filename=Path(filename).stem + '.at3', media_type='audio/wav')
 
 @api.post('/transcode')
 def transcode_atrac(type: atracTypes, background_tasks: BackgroundTasks, applyReplaygain: bool = False, loudnessTarget: Union[float, None] = Query(default=None, ge=-70, le=-5), file: UploadFile = File()):
@@ -65,9 +65,9 @@ def transcode_atrac(type: atracTypes, background_tasks: BackgroundTasks, applyRe
   
   logger.info("Starting at3tool...")
   output = do_encode(intermediary, type, logger)
-  background_tasks.add_task(remove_file, output, logger)
+ #background_tasks.add_task(remove_file, output, logger)
   background_tasks.add_task(remove_file, intermediary, logger)
-  return FileResponse(path=output, filename=Path(filename).stem + '.at3')
+  return FileResponse(path=output, filename=Path(filename).stem + '.at3', media_type='audio/wav')
 
 @api.post('/decode')
 def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
@@ -82,4 +82,4 @@ def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
       output], capture_output=True)
     logger.info(encoder.stdout.decode())
     background_tasks.add_task(remove_file, output, logger)
-    return FileResponse(path=output.name, filename=Path(filename).stem + '.wav')
+    return FileResponse(path=output.name, filename=Path(filename).stem + '.wav', media_type='audio/wav')
