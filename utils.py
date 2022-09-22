@@ -1,7 +1,9 @@
-import os
+import os, shutil, subprocess
 from enum import Enum
+from tempfile import gettempdir, NamedTemporaryFile
+from pathlib import Path
+from uuid import uuid4
 
-UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/uploads/')
 
 class atracTypes(str, Enum):
   LP2 = 'LP2'
@@ -20,3 +22,12 @@ def allowed_file(filename):
 def remove_file(filename, logger): 
   os.remove(filename)
   logger.info(f"Removed {filename}")
+
+
+def do_encode(input, type, logger):
+  output = Path(gettempdir(), str(uuid4())).absolute()
+  encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
+    input, 
+    output], capture_output=True)
+  logger.info(encoder.stdout.decode())
+  return output
