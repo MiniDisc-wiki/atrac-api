@@ -65,7 +65,7 @@ def transcode_atrac(type: atracTypes, background_tasks: BackgroundTasks, applyRe
   
   logger.info("Starting at3tool...")
   output = do_encode(intermediary, type, logger)
- #background_tasks.add_task(remove_file, output, logger)
+  background_tasks.add_task(remove_file, output, logger)
   background_tasks.add_task(remove_file, intermediary, logger)
   return FileResponse(path=output, filename=Path(filename).stem + '.at3', media_type='audio/wav')
 
