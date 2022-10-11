@@ -82,4 +82,4 @@ def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
       output], capture_output=True)
     logger.info(encoder.stdout.decode())
     background_tasks.add_task(remove_file, output, logger)
-    return FileResponse(path=output.name, filename=Path(filename).stem + '.wav', media_type='audio/wav')
+    return FileResponse(path=output, filename=Path(filename).stem + '.wav', media_type='audio/wav')
