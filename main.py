@@ -21,6 +21,8 @@ async def startup_event():
     allow_methods=["*"],
     allow_headers=["*"],
   )
+  subprocess.run(['/usr/bin/wineserver', '-p'])
+
 
 @api.get("/")
 async def root():
