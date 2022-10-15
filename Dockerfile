@@ -3,7 +3,7 @@ WORKDIR /root
 ENV ARCH=x86_64
 RUN apt-get update && apt-get install -y yasm git curl lbzip2 build-essential
 RUN git clone https://github.com/acoustid/ffmpeg-build.git
-RUN echo "FFMPEG_CONFIGURE_FLAGS+=(--enable-encoder=pcm_s16le --enable-muxer=wav --enable-filter=loudnorm --enable-filter=aresample --enable-filter=replaygain)" >> ffmpeg-build/common.sh
+RUN echo "FFMPEG_CONFIGURE_FLAGS+=(--enable-encoder=pcm_s16le --enable-muxer=wav --enable-filter=loudnorm --enable-filter=aresample --enable-filter=replaygain --enable-filter=volume)" >> ffmpeg-build/common.sh
 RUN ffmpeg-build/build-linux.sh
 RUN mv ffmpeg-build/artifacts/ffmpeg-*-linux-gnu/bin/ffmpeg .
 
