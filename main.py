@@ -63,7 +63,7 @@ def transcode_atrac(type: atracTypes, background_tasks: BackgroundTasks, applyRe
       Path(input.name),
       *transcoderCommands,
       intermediary], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    logger.info(transcoder.stdout.decode())
+    logger.info(transcoder.stdout.decode('utf-8', errors='ignore'))
   
   logger.info("Starting at3tool...")
   output = do_encode(intermediary, type, logger)

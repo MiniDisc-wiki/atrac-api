@@ -29,5 +29,5 @@ def do_encode(input, type, logger):
   encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
     input, 
     output], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  logger.info(encoder.stdout.decode())
+  logger.info(encoder.stdout.decode('utf-8', errors='ignore'))
   return output
