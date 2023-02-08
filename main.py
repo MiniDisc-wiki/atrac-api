@@ -81,7 +81,6 @@ def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
     shutil.copyfileobj(file.file, input)
     encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-d', 
       Path(input.name), 
-      output], capture_output=True)
-    logger.info(encoder.stdout.decode())
+      output])
     background_tasks.add_task(remove_file, output, logger)
     return FileResponse(path=output, filename=Path(filename).stem + '.wav', media_type='audio/wav')
