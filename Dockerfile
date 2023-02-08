@@ -1,4 +1,4 @@
-FROM python:slim AS builder
+FROM python:3.11-slim AS builder
 WORKDIR /root
 ENV ARCH=x86_64
 RUN apt-get update && apt-get install -y yasm git curl lbzip2 build-essential
@@ -7,7 +7,7 @@ RUN echo "FFMPEG_CONFIGURE_FLAGS+=(--enable-encoder=pcm_s16le --enable-muxer=wav
 RUN ffmpeg-build/build-linux.sh
 RUN mv ffmpeg-build/artifacts/ffmpeg-*-linux-gnu/bin/ffmpeg .
 
-FROM python:slim
+FROM python:3.11-slim
 
 ENV WINEPREFIX="/wine32" 
 ENV WINEARCH=win32 
