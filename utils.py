@@ -8,6 +8,7 @@ from uuid import uuid4
 class atracTypes(str, Enum):
   LP2     = 'LP2'
   LP4     = 'LP4'
+  LP105   = 'LP105'
   PLUS48  = 'PLUS48'
   PLUS64  = 'PLUS64'
   PLUS96  = 'PLUS96'
@@ -21,6 +22,7 @@ class atracTypes(str, Enum):
 bitrates = {
   'LP2':     132,
   'LP4':     66,
+  'LP105':   105,
   'PLUS48':  48,
   'PLUS64':  64,
   'PLUS96':  96,
