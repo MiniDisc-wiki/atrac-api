@@ -1,0 +1,13 @@
+version: "3"
+services:
+    atracapi:
+        build: .
+        environment:
+          - FORWARDED_ALLOW_IPS=10.0.0.43
+          - UVICORN_PORT=5000
+          - UVICORN_HOST=0.0.0.0
+          - UVICORN_PROXY_HEADERS=true
+        ports:
+           - 5000:5000
+        restart: unless-stopped
+        command: main:api

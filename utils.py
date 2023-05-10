@@ -46,7 +46,7 @@ def remove_file(filename, logger):
 
 def do_encode(input, type, logger):
   output = Path(gettempdir(), str(uuid4())).absolute()
-  subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
+  subprocess.run(['/usr/bin/at3tool', '-e', '-br', str(bitrates[type]), 
     input, 
     output])
   return output

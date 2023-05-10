@@ -21,7 +21,6 @@ async def startup_event():
     allow_methods=["*"],
     allow_headers=["*"],
   )
-  subprocess.run(['/usr/bin/wineserver', '-p'])
 
 
 @api.get("/")
@@ -79,7 +78,7 @@ def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
   output = Path(gettempdir(), str(uuid4())).absolute()
   with NamedTemporaryFile() as input:
     shutil.copyfileobj(file.file, input)
-    encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-d', 
+    encoder = subprocess.run(['/usr/bin/at3tool', '-d', 
       Path(input.name), 
       output])
     background_tasks.add_task(remove_file, output, logger)
