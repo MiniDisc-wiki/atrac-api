@@ -19,6 +19,7 @@ class atracTypes(str, Enum):
   PLUS320 = 'PLUS320'
   PLUS352 = 'PLUS352'
 
+
 bitrates = {
   'LP2':     132,
   'LP4':     66,
@@ -34,6 +35,7 @@ bitrates = {
   'PLUS352': 352
 }
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ['wav', 'at3']
@@ -46,7 +48,7 @@ def remove_file(filename, logger):
 
 def do_encode(input, type, logger):
   output = Path(gettempdir(), str(uuid4())).absolute()
-  subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-e', '-br', str(bitrates[type]), 
-    input, 
+  subprocess.run(['/usr/bin/at3tool', '-e', '-br', str(bitrates[type]),
+    input,
     output])
   return output

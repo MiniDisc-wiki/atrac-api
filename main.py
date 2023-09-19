@@ -5,13 +5,15 @@ from fastapi.responses import FileResponse, RedirectResponse
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 from tempfile import gettempdir, NamedTemporaryFile
-from utils import *
+from utils import atracTypes, remove_file, do_encode
 from typing import Union
 
 api = FastAPI(
   title="ATRAC API"
 )
 logger = logging.getLogger("uvicorn.info")
+
+
 @api.on_event("startup")
 async def startup_event():
   api.add_middleware(
@@ -21,12 +23,12 @@ async def startup_event():
     allow_methods=["*"],
     allow_headers=["*"],
   )
-  subprocess.run(['/usr/bin/wineserver', '-p'])
 
 
 @api.get("/")
 async def root():
     return RedirectResponse("/docs")
+
 
 @api.post('/encode')
 def encode_atrac(type: atracTypes, background_tasks: BackgroundTasks, file: UploadFile = File()):
@@ -38,6 +40,7 @@ def encode_atrac(type: atracTypes, background_tasks: BackgroundTasks, file: Uplo
     output = do_encode(input.name, type, logger)
   background_tasks.add_task(remove_file, output, logger)
   return FileResponse(path=output, filename=Path(filename).stem + '.at3', media_type='audio/wav')
+
 
 @api.post('/transcode')
 def transcode_atrac(type: atracTypes, background_tasks: BackgroundTasks, applyReplaygain: bool = False, loudnessTarget: Union[float, None] = Query(default=None, ge=-70, le=-5), file: UploadFile = File()):
@@ -64,12 +67,13 @@ def transcode_atrac(type: atracTypes, background_tasks: BackgroundTasks, applyRe
       *transcoderCommands,
       intermediary], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     logger.info(transcoder.stdout.decode('utf-8', errors='ignore'))
-  
+
   logger.info("Starting at3tool...")
   output = do_encode(intermediary, type, logger)
   background_tasks.add_task(remove_file, output, logger)
   background_tasks.add_task(remove_file, intermediary, logger)
   return FileResponse(path=output, filename=Path(filename).stem + '.at3', media_type='audio/wav')
+
 
 @api.post('/decode')
 def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
@@ -79,8 +83,9 @@ def decode_atrac(background_tasks: BackgroundTasks, file: UploadFile = File()):
   output = Path(gettempdir(), str(uuid4())).absolute()
   with NamedTemporaryFile() as input:
     shutil.copyfileobj(file.file, input)
-    encoder = subprocess.run(['/usr/bin/wine', 'psp_at3tool.exe', '-d', 
-      Path(input.name), 
+    encoder = subprocess.run([
+      '/usr/bin/at3tool', '-d',
+      Path(input.name),
       output])
     background_tasks.add_task(remove_file, output, logger)
     return FileResponse(path=output, filename=Path(filename).stem + '.wav', media_type='audio/wav')
